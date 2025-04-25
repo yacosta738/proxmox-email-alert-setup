@@ -1,113 +1,113 @@
 # Proxmox Email Alert Setup
 
-Este repositorio contiene un script para configurar fácilmente alertas por correo electrónico en servidores Proxmox utilizando Gmail/G Suite.
+This repository contains a script to easily configure email alerts on Proxmox servers using Gmail/G Suite.
 
-## 📋 Características
+## 📋 Features
 
-- Configuración automatizada de Postfix para el envío de correos
-- Soporte para autenticación SMTP con Gmail/G Suite
-- Personalización del nombre y dirección del remitente
-- Prueba de envío de correo para verificar la configuración
-- Instrucciones paso a paso para la configuración completa de las alertas en Proxmox
+- Automated configuration of Postfix for sending emails
+- Support for SMTP authentication with Gmail/G Suite
+- Customization of sender name and address
+- Email sending test to verify the configuration
+- Step-by-step instructions for complete alert setup in Proxmox
 
-## 🚀 Uso rápido
+## 🚀 Quick Usage
 
-Para ejecutar el script directamente desde GitHub:
+To run the script directly from GitHub:
 
 ```bash
 bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-email-alert-setup.sh)"
 ```
 
-> ⚠️ **Importante**: Reemplaza `yacosta738` con tu nombre de usuario de GitHub después de hacer fork o clonar este repositorio.
+> ⚠️ **Important**: Replace `yacosta738` with your GitHub username after forking or cloning this repository.
 
-## ⚙️ Requisitos previos
+## ⚙️ Prerequisites
 
-Antes de ejecutar el script, necesitarás:
+Before running the script, you'll need:
 
-1. Un servidor Proxmox VE instalado y funcionando
-2. Acceso root o sudo al servidor
-3. Una cuenta de Gmail/G Suite
-4. Una "Contraseña de aplicación" de Google (no tu contraseña normal)
-   - Para crear una, visita [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+1. A Proxmox VE server installed and running
+2. Root or sudo access to the server
+3. A Gmail/G Suite account
+4. A Google "App Password" (not your regular password)
+   - To create one, visit [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
 
-## 📥 Instalación manual
+## 📥 Manual Installation
 
-Si prefieres una instalación manual:
+If you prefer a manual installation:
 
-1. Clona este repositorio o descarga el script:
+1. Clone this repository or download the script:
 
    ```bash
    git clone https://github.com/yacosta738/proxmox-email-alert-setup.git
    cd proxmox-email-alert-setup
    ```
 
-2. Haz el script ejecutable:
+2. Make the script executable:
 
    ```bash
    chmod +x proxmox-email-alert-setup.sh
    ```
 
-3. Ejecuta el script con permisos de root:
+3. Run the script with root permissions:
 
    ```bash
    sudo ./proxmox-email-alert-setup.sh
    ```
 
-## 🔍 ¿Qué hace el script?
+## 🔍 What does the script do?
 
-1. **Instala dependencias necesarias**:
-   - `libsasl2-modules`: Soporte para autenticación SASL
-   - `mailutils`: Herramientas para enviar correos
-   - `postfix-pcre`: Soporte para expresiones regulares en Postfix
+1. **Installs necessary dependencies**:
+   - `libsasl2-modules`: Support for SASL authentication
+   - `mailutils`: Tools for sending emails
+   - `postfix-pcre`: Support for regular expressions in Postfix
 
-2. **Configura la autenticación SMTP** para Gmail/G Suite:
-   - Crea y configura el archivo de contraseñas SASL
-   - Actualiza la configuración de Postfix para usar TLS
+2. **Configures SMTP authentication** for Gmail/G Suite:
+   - Creates and configures the SASL password file
+   - Updates Postfix configuration to use TLS
 
-3. **Personaliza el remitente** de los correos electrónicos:
-   - Permite especificar un nombre y dirección de correo personalizada
+3. **Customizes the sender** of email notifications:
+   - Allows you to specify a custom name and email address
 
-4. **Prueba la configuración** enviando un correo electrónico de prueba
+4. **Tests the configuration** by sending a test email
 
-5. **Proporciona instrucciones** para completar la configuración en la interfaz web de Proxmox
+5. **Provides instructions** to complete the setup in the Proxmox web interface
 
-## 🛠️ Configuración adicional en Proxmox
+## 🛠️ Additional Configuration in Proxmox
 
-Después de ejecutar el script, debes completar la configuración en la interfaz web de Proxmox:
+After running the script, you need to complete the configuration in the Proxmox web interface:
 
-1. **Configurar destinatario de alertas**:
-   - Ve a `Datacenter` -> `Opciones` -> `Notificaciones por Correo Electrónico`
-   - Configura la dirección de correo del destinatario
+1. **Configure alerts recipient**:
+   - Go to `Datacenter` -> `Options` -> `Email Notifications`
+   - Set up the recipient's email address
 
-2. **Habilitar alertas específicas**:
-   - **Backups**: En la configuración de tus trabajos de backup
-   - **SMART**: En la sección de discos de tu nodo
-   - **ZFS**: Se envían automáticamente si las notificaciones generales están configuradas
+2. **Enable specific alerts**:
+   - **Backups**: In your backup job configuration
+   - **SMART**: In your node's disks section
+   - **ZFS**: Sent automatically if general notifications are configured
 
-## 📝 Solución de problemas
+## 📝 Troubleshooting
 
-Si encuentras problemas:
+If you encounter issues:
 
-1. Revisa los logs de Postfix:
+1. Check Postfix logs:
 
    ```bash
    tail -f /var/log/mail.log
    ```
 
-2. Verifica que la "Contraseña de aplicación" de Google sea correcta
+2. Verify that your Google App Password is correct
 
-3. Asegúrate de que tu cuenta de Google no tenga restricciones que impidan el acceso de aplicaciones menos seguras
+3. Make sure your Google account doesn't have restrictions preventing less secure apps access
 
-4. Si utilizas Gmail, verifica que el acceso a aplicaciones menos seguras esté habilitado (o usa una Contraseña de aplicación si tienes habilitada la autenticación de dos factores)
+4. If using Gmail, verify that less secure apps access is enabled (or use an App Password if you have two-factor authentication enabled)
 
-## ⭐ Basado en
+## ⭐ Based on
 
-Este script está basado en el excelente tutorial de [Techno Tim](https://technotim.live/posts/proxmox-alerts/).
+This script is based on the excellent tutorial by [Techno Tim](https://technotim.live/posts/proxmox-alerts/).
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-Las contribuciones son bienvenidas. Si encuentras algún problema o tienes una mejora, no dudes en abrir un issue o enviar un pull request.
+Contributions are welcome. If you find any issues or have improvements, feel free to open an issue or submit a pull request.

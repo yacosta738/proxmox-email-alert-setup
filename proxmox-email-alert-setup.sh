@@ -1,157 +1,157 @@
 #!/bin/bash
 
-# Script para configurar alertas de correo electrónico en Proxmox usando Gmail/G Suite
-# Basado en el tutorial de Techno Tim: https://technotim.live/posts/proxmox-alerts/
-# IMPORTANTE: Ejecuta este script con sudo o como root.
+# Script to configure email alerts in Proxmox using Gmail/G Suite
+# Based on Techno Tim's tutorial: https://technotim.live/posts/proxmox-alerts/
+# IMPORTANT: Run this script with sudo or as root.
 
-# --- Comprobación de privilegios ---
+# --- Privilege Check ---
 if [ "$(id -u)" -ne 0 ]; then
-  echo "Este script debe ejecutarse como root o con sudo." >&2
+  echo "This script must be run as root or with sudo." >&2
   exit 1
 fi
 
-# --- Salir en caso de error ---
+# --- Exit on error ---
 set -e
 
-# --- Variables (puedes modificarlas si lo deseas) ---
+# --- Variables (you can modify them if desired) ---
 POSTFIX_MAIN_CONF="/etc/postfix/main.cf"
 POSTFIX_SASL_PASSWD="/etc/postfix/sasl_passwd"
 POSTFIX_HEADER_CHECKS="/etc/postfix/smtp_header_checks"
 GMAIL_SMTP_SERVER="smtp.gmail.com"
 GMAIL_SMTP_PORT="587"
 
-# --- Inicio de la Configuración ---
-echo "--- Iniciando la configuración de alertas de correo electrónico para Proxmox ---"
+# --- Start of Configuration ---
+echo "--- Starting Proxmox email alert configuration ---"
 
-# --- 1. Instalar dependencias ---
-echo "--- Paso 1: Actualizando lista de paquetes e instalando dependencias (libsasl2-modules, mailutils, postfix-pcre) ---"
+# --- 1. Install dependencies ---
+echo "--- Step 1: Updating package list and installing dependencies (libsasl2-modules, mailutils, postfix-pcre) ---"
 apt update
 apt install -y libsasl2-modules mailutils postfix-pcre
-echo "--- Dependencias instaladas correctamente ---"
+echo "--- Dependencies installed successfully ---"
 echo
 
-# --- 2. Configurar contraseña de aplicación de Google ---
-echo "--- Paso 2: Configuración de la cuenta de Google ---"
-echo "Necesitarás una 'Contraseña de aplicación' de tu cuenta de Google."
-echo "Si no tienes una, créala aquí: https://myaccount.google.com/apppasswords"
-read -p "Introduce tu dirección de correo electrónico de Gmail/G Suite: " GMAIL_USER
-read -sp "Introduce tu Contraseña de Aplicación de Google: " GMAIL_APP_PASSWORD
-echo # Nueva línea después de la entrada de contraseña
+# --- 2. Configure Google app password ---
+echo "--- Step 2: Google account configuration ---"
+echo "You will need an 'App Password' from your Google account."
+echo "If you don't have one, create it here: https://myaccount.google.com/apppasswords"
+read -p "Enter your Gmail/G Suite email address: " GMAIL_USER
+read -sp "Enter your Google App Password: " GMAIL_APP_PASSWORD
+echo # New line after password entry
 echo
 
-# --- 3. Configurar Postfix ---
-echo "--- Paso 3: Configurando Postfix ---"
+# --- 3. Configure Postfix ---
+echo "--- Step 3: Configuring Postfix ---"
 
-# Crear/actualizar archivo de contraseñas SASL
-echo "Creando el archivo de contraseñas SASL..."
+# Create/update SASL password file
+echo "Creating SASL password file..."
 echo "[${GMAIL_SMTP_SERVER}]:${GMAIL_SMTP_PORT} ${GMAIL_USER}:${GMAIL_APP_PASSWORD}" > "${POSTFIX_SASL_PASSWD}"
 
-# Establecer permisos correctos
-echo "Estableciendo permisos para ${POSTFIX_SASL_PASSWD}..."
+# Set correct permissions
+echo "Setting permissions for ${POSTFIX_SASL_PASSWD}..."
 chmod 600 "${POSTFIX_SASL_PASSWD}"
 
-# Hashear el archivo de contraseñas
-echo "Hasheando el archivo de contraseñas SASL..."
+# Hash the password file
+echo "Hashing SASL password file..."
 postmap hash:"${POSTFIX_SASL_PASSWD}"
 
-# Comprobar si se creó el archivo .db (opcional, informativo)
+# Check if the .db file was created (optional, informational)
 if [ -f "${POSTFIX_SASL_PASSWD}.db" ]; then
-    echo "Archivo ${POSTFIX_SASL_PASSWD}.db creado correctamente."
+    echo "File ${POSTFIX_SASL_PASSWD}.db created successfully."
 else
-    echo "¡ADVERTENCIA! No se pudo encontrar ${POSTFIX_SASL_PASSWD}.db." >&2
+    echo "WARNING! Could not find ${POSTFIX_SASL_PASSWD}.db." >&2
 fi
 
-# Hacer copia de seguridad y actualizar main.cf
-echo "Haciendo copia de seguridad de ${POSTFIX_MAIN_CONF} a ${POSTFIX_MAIN_CONF}.bak..."
+# Backup and update main.cf
+echo "Backing up ${POSTFIX_MAIN_CONF} to ${POSTFIX_MAIN_CONF}.bak..."
 cp "${POSTFIX_MAIN_CONF}" "${POSTFIX_MAIN_CONF}.bak"
 
-echo "Añadiendo configuración de Gmail a ${POSTFIX_MAIN_CONF}..."
-# Eliminar configuraciones antiguas si existen para evitar duplicados (opcional pero recomendado)
+echo "Adding Gmail configuration to ${POSTFIX_MAIN_CONF}..."
+# Remove old configurations if they exist to avoid duplicates (optional but recommended)
 sed -i '/^# google mail configuration/,+9 d' "${POSTFIX_MAIN_CONF}"
 sed -i '/^smtp_header_checks = .*/d' "${POSTFIX_MAIN_CONF}"
-# Eliminar la línea existente de relayhost para evitar conflictos
+# Remove existing relayhost line to avoid conflicts
 sed -i '/^relayhost = /d' "${POSTFIX_MAIN_CONF}"
 
-# Añadir nueva configuración
+# Add new configuration
 cat << EOF >> "${POSTFIX_MAIN_CONF}"
 
-# google mail configuration - añadido por script
+# google mail configuration - added by script
 relayhost = [${GMAIL_SMTP_SERVER}]:${GMAIL_SMTP_PORT}
 smtp_use_tls = yes
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
 smtp_sasl_password_maps = hash:${POSTFIX_SASL_PASSWD}
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-# Las siguientes líneas pueden variar o no ser necesarias en todas las configuraciones, pero se incluyen según el tutorial
+# The following lines may vary or may not be necessary in all configurations, but are included according to the tutorial
 # smtp_tls_session_cache_database = btree:\${data_directory}/smtp_scache
 # smtp_tls_session_cache_timeout = 3600s
 EOF
 
-echo "Configuración de relayhost añadida."
+echo "Relayhost configuration added."
 echo
 
-# --- 4. Personalizar el nombre del remitente ---
-echo "--- Paso 4: Personalizando el nombre del remitente del correo ---"
-read -p "Introduce el nombre del remitente deseado (ej: Servidor Proxmox PVE1): " FROM_NAME
-read -p "Introduce la dirección de correo electrónico del remitente deseado (puede ser la misma de Gmail o una diferente, ej: pve1-alert@tu_dominio.com): " FROM_EMAIL
+# --- 4. Customize sender name ---
+echo "--- Step 4: Customizing email sender name ---"
+read -p "Enter the desired sender name (e.g., Proxmox Server PVE1): " FROM_NAME
+read -p "Enter the desired sender email address (can be the same as Gmail or different, e.g., pve1-alert@your_domain.com): " FROM_EMAIL
 
-# Crear/actualizar archivo smtp_header_checks
-echo "Creando ${POSTFIX_HEADER_CHECKS}..."
+# Create/update smtp_header_checks file
+echo "Creating ${POSTFIX_HEADER_CHECKS}..."
 echo "/^From:.*/ REPLACE From: ${FROM_NAME} <${FROM_EMAIL}>" > "${POSTFIX_HEADER_CHECKS}"
 
-# Hashear el archivo
-echo "Hasheando ${POSTFIX_HEADER_CHECKS}..."
+# Hash the file
+echo "Hashing ${POSTFIX_HEADER_CHECKS}..."
 postmap hash:"${POSTFIX_HEADER_CHECKS}"
 
-# Comprobar si se creó el archivo .db (opcional, informativo)
+# Check if the .db file was created (optional, informational)
 if [ -f "${POSTFIX_HEADER_CHECKS}.db" ]; then
-    echo "Archivo ${POSTFIX_HEADER_CHECKS}.db creado correctamente."
+    echo "File ${POSTFIX_HEADER_CHECKS}.db created successfully."
 else
-    echo "¡ADVERTENCIA! No se pudo encontrar ${POSTFIX_HEADER_CHECKS}.db." >&2
+    echo "WARNING! Could not find ${POSTFIX_HEADER_CHECKS}.db." >&2
 fi
 
-# Añadir la configuración a main.cf
-echo "Añadiendo la configuración de smtp_header_checks a ${POSTFIX_MAIN_CONF}..."
+# Add configuration to main.cf
+echo "Adding smtp_header_checks configuration to ${POSTFIX_MAIN_CONF}..."
 echo "smtp_header_checks = pcre:${POSTFIX_HEADER_CHECKS}" >> "${POSTFIX_MAIN_CONF}"
-echo "Configuración de personalización del remitente añadida."
+echo "Sender customization configuration added."
 echo
 
-# --- 5. Recargar Postfix ---
-echo "--- Paso 5: Recargando el servicio Postfix ---"
+# --- 5. Reload Postfix ---
+echo "--- Step 5: Reloading Postfix service ---"
 systemctl reload postfix
-echo "Postfix recargado."
+echo "Postfix reloaded."
 echo
 
-# --- 6. Enviar correo de prueba ---
-echo "--- Paso 6: Prueba de envío de correo ---"
-read -p "¿Deseas enviar un correo de prueba a ${GMAIL_USER}? (s/N): " SEND_TEST_EMAIL
-if [[ "$SEND_TEST_EMAIL" =~ ^[Ss]$ ]]; then
-    echo "Enviando correo de prueba a ${GMAIL_USER}..."
-    if echo "Este es un mensaje de prueba enviado desde Postfix en tu servidor Proxmox (${HOSTNAME})" | mail -s "Correo de Prueba desde Proxmox (${HOSTNAME})" "${GMAIL_USER}"; then
-        echo "Correo de prueba enviado. Revisa tu bandeja de entrada (y la carpeta de spam)."
+# --- 6. Send test email ---
+echo "--- Step 6: Test email sending ---"
+read -p "Do you want to send a test email to ${GMAIL_USER}? (y/N): " SEND_TEST_EMAIL
+if [[ "$SEND_TEST_EMAIL" =~ ^[Yy]$ ]]; then
+    echo "Sending test email to ${GMAIL_USER}..."
+    if echo "This is a test message sent from Postfix on your Proxmox server (${HOSTNAME})" | mail -s "Test Email from Proxmox (${HOSTNAME})" "${GMAIL_USER}"; then
+        echo "Test email sent. Check your inbox (and spam folder)."
     else
-        echo "¡Error al enviar el correo de prueba! Revisa la configuración y los logs de Postfix (/var/log/mail.log)." >&2
+        echo "Error sending test email! Check Postfix configuration and logs (/var/log/mail.log)." >&2
     fi
 else
-    echo "Omitiendo envío de correo de prueba."
+    echo "Skipping test email."
 fi
 echo
 
-# --- 7. Pasos Finales (Manuales) ---
-echo "--- ¡Configuración básica completada! ---"
+# --- 7. Final Steps (Manual) ---
+echo "--- Basic configuration completed! ---"
 echo
-echo "--- Pasos Finales Importantes (Manuales en la GUI de Proxmox): ---"
-echo "1.  **Configurar Destinatario de Notificaciones:**"
-echo "    Ve a 'Datacenter' -> 'Opciones' -> 'Notificaciones por Correo Electrónico'."
-echo "    Establece la 'Dirección de correo electrónico del destinatario' a donde quieres que lleguen las alertas."
-echo "    Puedes necesitar configurar también 'Dirección de correo electrónico del remitente' aquí si no personalizaste el remitente antes o si Proxmox lo requiere."
+echo "--- Important Final Steps (Manual in Proxmox GUI): ---"
+echo "1.  **Configure Notification Recipient:**"
+echo "    Go to 'Datacenter' -> 'Options' -> 'Email Notifications'."
+echo "    Set the 'Email Recipient Address' to where you want alerts to be delivered."
+echo "    You may also need to configure the 'Email From Address' here if you didn't customize the sender earlier or if Proxmox requires it."
 echo
-echo "2.  **Habilitar Alertas Específicas:**"
-echo "    * **Alertas de Backup:** En la configuración de tus trabajos de backup ('Datacenter' -> 'Backup'), asegúrate de que la opción 'Enviar correo electrónico a' esté configurada con la dirección deseada y selecciona cuándo enviar correos (ej: 'Siempre' o 'En caso de fallo')."
-echo "    * **Alertas SMART:** Ve a 'Tu Nodo' -> 'Discos' -> 'SMART'. Habilita el monitoreo SMART para tus discos si aún no lo has hecho. Las alertas deberían usar la configuración global de notificaciones."
-echo "    * **Alertas ZFS:** Si usas ZFS, Proxmox monitoriza el estado del pool. Asegúrate de que las notificaciones generales estén configuradas como se indicó en el paso 1. Puedes probar forzando un error (¡CON PRECAUCIÓN!) como se muestra en el video tutorial."
+echo "2.  **Enable Specific Alerts:**"
+echo "    * **Backup Alerts:** In your backup job configuration ('Datacenter' -> 'Backup'), make sure the 'Send email to' option is configured with the desired address and select when to send emails (e.g., 'Always' or 'On failure')."
+echo "    * **SMART Alerts:** Go to 'Your Node' -> 'Disks' -> 'SMART'. Enable SMART monitoring for your disks if you haven't already. Alerts should use the global notification settings."
+echo "    * **ZFS Alerts:** If you use ZFS, Proxmox monitors pool status. Make sure general notifications are configured as indicated in step 1. You can test by forcing an error (WITH CAUTION!) as shown in the tutorial video."
 echo
-echo "Recuerda revisar los logs de Postfix (/var/log/mail.log) si encuentras problemas."
-echo "--- Script finalizado ---"
+echo "Remember to check Postfix logs (/var/log/mail.log) if you encounter issues."
+echo "--- Script finished ---"
 
 exit 0
