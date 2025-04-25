@@ -69,6 +69,8 @@ echo "Añadiendo configuración de Gmail a ${POSTFIX_MAIN_CONF}..."
 # Eliminar configuraciones antiguas si existen para evitar duplicados (opcional pero recomendado)
 sed -i '/^# google mail configuration/,+9 d' "${POSTFIX_MAIN_CONF}"
 sed -i '/^smtp_header_checks = .*/d' "${POSTFIX_MAIN_CONF}"
+# Eliminar la línea existente de relayhost para evitar conflictos
+sed -i '/^relayhost = /d' "${POSTFIX_MAIN_CONF}"
 
 # Añadir nueva configuración
 cat << EOF >> "${POSTFIX_MAIN_CONF}"
