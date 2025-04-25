@@ -15,10 +15,10 @@ Este repositorio contiene un script para configurar fácilmente alertas por corr
 Para ejecutar el script directamente desde GitHub:
 
 ```bash
-bash -c "$(curl -fsS https://raw.githubusercontent.com/TU-USUARIO/proxmox-email-alert-setup/main/proxmox-email-alert-setup.sh)"
+bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-email-alert-setup.sh)"
 ```
 
-> ⚠️ **Importante**: Reemplaza `TU-USUARIO` con tu nombre de usuario de GitHub después de hacer fork o clonar este repositorio.
+> ⚠️ **Importante**: Reemplaza `yacosta738` con tu nombre de usuario de GitHub después de hacer fork o clonar este repositorio.
 
 ## ⚙️ Requisitos previos
 
@@ -37,7 +37,7 @@ Si prefieres una instalación manual:
 1. Clona este repositorio o descarga el script:
 
    ```bash
-   git clone https://github.com/TU-USUARIO/proxmox-email-alert-setup.git
+   git clone https://github.com/yacosta738/proxmox-email-alert-setup.git
    cd proxmox-email-alert-setup
    ```
 
