@@ -1,6 +1,6 @@
 # Proxmox Email Alert Setup
 
-This repository contains a script to easily configure email alerts on Proxmox servers using Gmail/G Suite.
+This repository contains scripts to easily configure email alerts and useful aliases on Proxmox servers.
 
 ## 📋 Features
 
@@ -9,13 +9,20 @@ This repository contains a script to easily configure email alerts on Proxmox se
 - Customization of sender name and address
 - Email sending test to verify the configuration
 - Step-by-step instructions for complete alert setup in Proxmox
+- Script to add useful aliases to your Proxmox shell
 
 ## 🚀 Quick Usage
 
-To run the script directly from GitHub:
+To run the email setup script directly from GitHub:
 
 ```bash
 bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-email-alert-setup.sh)"
+```
+
+To run the alias setup script directly from GitHub:
+
+```bash
+bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-setup.sh)"
 ```
 
 > ⚠️ **Important**: Replace `yacosta738` with your GitHub username after forking or cloning this repository.
@@ -34,26 +41,33 @@ Before running the script, you'll need:
 
 If you prefer a manual installation:
 
-1. Clone this repository or download the script:
+1. Clone this repository or download the scripts:
 
    ```bash
    git clone https://github.com/yacosta738/proxmox-email-alert-setup.git
    cd proxmox-email-alert-setup
    ```
 
-2. Make the script executable:
+2. Make the scripts executable:
 
    ```bash
    chmod +x proxmox-email-alert-setup.sh
+   chmod +x proxmox-alias-setup.sh
    ```
 
-3. Run the script with root permissions:
+3. Run the scripts:
 
    ```bash
+   # For email alerts setup (requires root/sudo)
    sudo ./proxmox-email-alert-setup.sh
+   
+   # For adding useful aliases (can be run as regular user)
+   ./proxmox-alias-setup.sh
    ```
 
-## 🔍 What does the script do?
+## 🔍 What do the scripts do?
+
+### Email Alert Setup
 
 1. **Installs necessary dependencies**:
    - `libsasl2-modules`: Support for SASL authentication
@@ -70,6 +84,20 @@ If you prefer a manual installation:
 4. **Tests the configuration** by sending a test email
 
 5. **Provides instructions** to complete the setup in the Proxmox web interface
+
+### Alias Setup
+
+The `proxmox-alias-setup.sh` script adds convenient aliases to your shell configuration:
+
+1. **Automatically detects your shell** (Bash or Zsh)
+2. **Adds useful aliases** to your configuration file:
+   - `mv='mv -i'`: Interactive move to prevent accidental overwrites
+   - `aptup='apt update && apt upgrade'`: Quick package updates
+   - `lxcclean`: Clean unused LXC container data
+   - `lxcupdate`: Update all LXC containers
+   - `lxctrim`: Run FSTRIM on LXC containers
+   - `kernelclean`: Clean old kernel packages
+   - `updatecerts='pvecm updatecerts'`: Update Proxmox cluster certificates
 
 ## 🛠️ Additional Configuration in Proxmox
 
