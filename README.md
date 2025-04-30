@@ -128,6 +128,18 @@ If you encounter issues:
 
 4. If using Gmail, verify that less secure apps access is enabled (or use an App Password if you have two-factor authentication enabled)
 
+## 🛠️ Figurine Script Installation
+
+To run the figurine setup script directly from GitHub:
+
+```bash
+bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-figurine-setup.sh)"
+```
+
+### What does the figurine script do?
+
+The `proxmox-alias-figurine-setup.sh` script installs the `figurine` tool and configures it to display the hostname in a 3D font whenever you open a new terminal session. It automatically detects your shell configuration file and adds the necessary commands to it.
+
 ## ⭐ Based on
 
 This script is based on the excellent tutorial by [Techno Tim](https://technotim.live/posts/proxmox-alerts/).
