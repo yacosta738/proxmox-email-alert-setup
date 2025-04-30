@@ -196,7 +196,7 @@ install_figurine() {
   
   # Try to install using the installer script
   log_verbose "Attempting installation via installer script"
-  if curl -sSL https://raw.githubusercontent.com/yacosta738/figurine/main/install.sh | bash; then
+  if curl -sSL https://raw.githubusercontent.com/yacosta738/figurine/refs/heads/master/install.sh | bash; then
     log_verbose "Installer script completed successfully"
     echo -e "${GREEN}✓ Figurine installed successfully.${NC}"
   else
