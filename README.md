@@ -139,6 +139,7 @@ bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-
 
 For detailed verbose output showing what's happening during the setup process:
 
+The `--` argument separator is used to indicate the end of options for the `bash -c` command and the beginning of arguments passed to the script. This ensures that options like `--verbose` are correctly interpreted by the script rather than by the `bash` command.
 ```bash
 bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-figurine-setup.sh)" -- --verbose
 ```
