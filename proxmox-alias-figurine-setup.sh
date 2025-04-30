@@ -41,6 +41,11 @@ parse_args() {
         exit 0
         ;;
       -s|--shell)
+        if [ -z "$2" ] || [[ "$2" =~ ^- ]]; then
+          echo -e "${RED}Error: --shell requires an argument.${NC}" >&2
+          show_usage
+          exit 1
+        fi
         CUSTOM_SHELL="$2"
         log_verbose "Custom shell specified: $CUSTOM_SHELL"
         shift
