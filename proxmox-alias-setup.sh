@@ -8,33 +8,75 @@
 CONFIG_FILE=""
 SHELL_TYPE=""
 
-# First, attempt to detect based on SHELL variable
-CURRENT_SHELL=$(basename "$SHELL")
+# Display diagnostic info
+echo "Diagnostic information:"
+echo "Current \$SHELL: $SHELL"
+echo "Environment detection: $(env | grep ZSH || echo 'No ZSH environment variables found')"
+echo "Shell process: $(ps -p $$ -o comm=)"
+echo "------------------------------"
 
-if [ "$CURRENT_SHELL" = "bash" ]; then
-    CONFIG_FILE="$HOME/.bashrc"
-    SHELL_TYPE="Bash"
-elif [ "$CURRENT_SHELL" = "zsh" ]; then
+# First, check for ZSH-specific environment variables
+if [ -n "$ZSH_VERSION" ]; then
     CONFIG_FILE="$HOME/.zshrc"
-    SHELL_TYPE="Zsh"
+    SHELL_TYPE="Zsh (detected by ZSH_VERSION)"
+# Then attempt to detect based on SHELL variable
+elif [ "$(basename "$SHELL")" = "zsh" ]; then
+    CONFIG_FILE="$HOME/.zshrc"
+    SHELL_TYPE="Zsh (detected by SHELL)"
+elif [ "$(basename "$SHELL")" = "bash" ]; then
+    CONFIG_FILE="$HOME/.bashrc"
+    SHELL_TYPE="Bash (detected by SHELL)"
 else
-    # If detection fails, attempt to detect by file existence
-    if [ -f "$HOME/.bashrc" ]; then
+    # If detection fails, attempt to detect by file existence and current environment
+    if [ -f "$HOME/.zshrc" ] && command -v zsh &> /dev/null; then
+        CONFIG_FILE="$HOME/.zshrc"
+        SHELL_TYPE="Zsh (detected by file presence and command)"
+    elif [ -f "$HOME/.bashrc" ]; then
         CONFIG_FILE="$HOME/.bashrc"
         SHELL_TYPE="Bash (detected by file)"
-    elif [ -f "$HOME/.zshrc" ]; then
-        CONFIG_FILE="$HOME/.zshrc"
-        SHELL_TYPE="Zsh (detected by file)"
     else
         echo "Error: Could not automatically determine your shell configuration file (.bashrc or .zshrc)."
-        echo "Please edit this script and set the CONFIG_FILE variable manually."
-        exit 1
+        echo "Please specify your shell configuration file:"
+        echo "1) ~/.bashrc"
+        echo "2) ~/.zshrc"
+        echo "3) Other (specify path)"
+        read -p "Enter choice (1/2/3): " shell_choice
+        
+        case $shell_choice in
+            1)
+                CONFIG_FILE="$HOME/.bashrc"
+                SHELL_TYPE="Bash (manually selected)"
+                ;;
+            2)
+                CONFIG_FILE="$HOME/.zshrc"
+                SHELL_TYPE="Zsh (manually selected)"
+                ;;
+            3)
+                read -p "Enter the full path to your shell configuration file: " custom_path
+                CONFIG_FILE="$custom_path"
+                SHELL_TYPE="Custom (manually specified)"
+                ;;
+            *)
+                echo "Invalid choice. Exiting."
+                exit 1
+                ;;
+        esac
     fi
 fi
 
 echo "Detected shell: $SHELL_TYPE"
 echo "Using configuration file: $CONFIG_FILE"
 echo ""
+
+# Verify that the config file exists or can be created
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Configuration file $CONFIG_FILE does not exist. Creating it..."
+    touch "$CONFIG_FILE" || { 
+        echo "Error: Could not create $CONFIG_FILE. Please check permissions."; 
+        exit 1; 
+    }
+    echo "Created $CONFIG_FILE successfully."
+fi
 
 # Check if wget is installed, as several aliases require it
 if ! command -v wget &> /dev/null; then

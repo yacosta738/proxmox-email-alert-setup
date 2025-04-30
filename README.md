@@ -10,6 +10,7 @@ This repository contains scripts to easily configure email alerts and useful ali
 - Email sending test to verify the configuration
 - Step-by-step instructions for complete alert setup in Proxmox
 - Script to add useful aliases to your Proxmox shell
+- Verbose mode option to see detailed script execution information
 
 ## 🚀 Quick Usage
 
@@ -134,6 +135,24 @@ To run the figurine setup script directly from GitHub:
 
 ```bash
 bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-figurine-setup.sh)"
+```
+
+For detailed verbose output showing what's happening during the setup process:
+
+```bash
+bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-figurine-setup.sh)" -- --verbose
+```
+
+You can also use the `-v` short option for verbose mode:
+
+```bash
+bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-figurine-setup.sh)" -- -v
+```
+
+For help and available options:
+
+```bash
+bash -c "$(curl -fsS https://raw.githubusercontent.com/yacosta738/proxmox-email-alert-setup/main/proxmox-alias-figurine-setup.sh)" -- --help
 ```
 
 ### What does the figurine script do?
