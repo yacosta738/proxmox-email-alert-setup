@@ -261,10 +261,12 @@ add_to_shell_config() {
   log_verbose "Adding figurine command to configuration file"
   cat >> "$shell_config" << EOF
 
-# Display hostname with figurine
-echo ""
-figurine -f "3d.flf" \$(hostname)
-echo ""
+# Display hostname with figurine (interactive only)
+if [[ \$- == *i* ]]; then
+  echo ""
+  figurine -f "3d.flf" \$(hostname)
+  echo ""
+fi
 EOF
   
   log_verbose "Command added successfully"
